@@ -1,0 +1,11 @@
+{
+  "name": "webgltest",
+  "version": "1.0.0",
+  "scripts": {
+    "build-dev": "esbuild main.ts --bundle --sourcemap --allow-overwrite --servedir=. --outdir=build",
+    "watch": "esbuild main.ts --bundle --watch --allow-overwrite --servedir=. --outdir=build"
+  },
+  "devDependencies": {
+    "esbuild": "0.20.1"
+  }
+}

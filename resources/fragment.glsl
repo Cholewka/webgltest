@@ -9,5 +9,5 @@ uniform sampler2D texture1;
 uniform sampler2D texture2;
 
 void main() {
-    outputColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.05);
+    outputColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
 }

@@ -1,6 +1,6 @@
 import {init} from "./src/drawing";
 
-async function main() {
+function main() {
     const canvas = document.getElementById("webgl-canvas");
     if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
         throw new Error("Cannot find WebGL canvas.");
@@ -9,6 +9,8 @@ async function main() {
     if (!gl) {
         throw new Error("WebGL2 is not supported in your browser.");
     }
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     init(gl);
 }
 

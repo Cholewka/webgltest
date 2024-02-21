@@ -7,6 +7,11 @@
     <title>WebGL Test</title>
 
     <style>
+        html, body {
+            margin: 0; padding: 0;
+            overflow-y: hidden;
+        }
+
         #webgl-canvas {
             /* This will colour our canvas if we mess up the transparency. */
             background-color: #333;
@@ -15,9 +20,7 @@
 </head>
 
 <body>
-    <canvas id="webgl-canvas" width="600" height="400"></canvas>
-    <section id="error-box"></section>
-
+    <canvas id="webgl-canvas"></canvas>
     <script type="text/javascript" src="./build/main.js"></script>
 </body>
 

@@ -1,7 +1,16 @@
 import Shader from './shader';
 import {loadImage} from "./resources";
 
+// Abstract into class
+const textures: WebGLTexture[] = [];
+let program: WebGLProgram;
+
 export async function init(gl: WebGL2RenderingContext) {
+    const canvas = document.getElementById("webgl-canvas");
+    if (!(canvas instanceof HTMLCanvasElement)) {
+        throw new Error("Cannot find canvas element.");
+    }
+
     const vertices = new Float32Array([
         // position (8 bytes)   // texture coordinates (8 bytes)
          0.5,  0.5,             1.0, 1.0,
@@ -31,7 +40,7 @@ export async function init(gl: WebGL2RenderingContext) {
     gl.bindVertexArray(vertexArrayObject);
 
     // Load program
-    const program = await new Shader(gl, "vertex.glsl", "fragment.glsl").use();
+    program = await new Shader(gl, "vertex.glsl", "fragment.glsl").use();
     gl.useProgram(program);
 
     // Set Attribute Pointers
@@ -50,36 +59,42 @@ export async function init(gl: WebGL2RenderingContext) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-    // Create Texture
+    // Textures
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
     /// Box
     const boxImage = await loadImage("../resources/texture.jpg");
-    const box = newTexture(gl, boxImage);
+    textures.push(newTexture(gl, boxImage));
     
     /// Awesome Face
     const faceImage = await loadImage("../resources/awesomeface.png");
-    const face = newTexture(gl, faceImage);
-
-    /// Setup Shader
-    gl.uniform1i(gl.getUniformLocation(program, "texture1"), 0);
-    gl.uniform1i(gl.getUniformLocation(program, "texture2"), 1);
+    textures.push(newTexture(gl, faceImage))
 
     // Draw Call
+    refreshViewport(gl, canvas);
+    draw(gl);
+
+    window.addEventListener("resize", () => refreshViewport(gl, canvas));
+}
+
+export function draw(gl: WebGL2RenderingContext) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.bindVertexArray(vertexArrayObject);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, box);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, face);
+    textures.forEach(function (texture, index) {
+        gl.activeTexture(gl["TEXTURE"+index]);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(gl.getUniformLocation(program, "texture"+(index+1)), index);
+    });
 
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0);
 }
 
-function newTexture(gl: WebGL2RenderingContext, source: HTMLImageElement) {
+function newTexture(gl: WebGL2RenderingContext, source: HTMLImageElement): WebGLTexture {
     const texture = gl.createTexture();
+    if (!texture) {
+        throw new Error("Cannot allocate memory for a texture.");
+    }
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, source.width, source.height, 0, gl.RGB, gl.UNSIGNED_BYTE, source);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -88,4 +103,13 @@ function newTexture(gl: WebGL2RenderingContext, source: HTMLImageElement) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
     gl.generateMipmap(gl.TEXTURE_2D);
     return texture;
+}
+
+function refreshViewport(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    gl.viewport(0, 0, width, height);
+    draw(gl);
 }

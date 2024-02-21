@@ -3,11 +3,11 @@ precision mediump float;
 
 out vec4 outputColor;
 
-in vec3 ourColor;
 in vec2 TexCoord;
 
-uniform sampler2D ourTexture;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 
 void main() {
-    outputColor = texture(ourTexture, TexCoord);
+    outputColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.05);
 }

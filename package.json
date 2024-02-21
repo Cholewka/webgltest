@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "build-dev": "esbuild main.ts --bundle --sourcemap --allow-overwrite --servedir=. --outdir=build",
-    "watch": "esbuild main.ts --bundle --watch --allow-overwrite --servedir=. --outdir=build"
+    "build-prod": "esbuild main.ts --bundle --minify --outdir=build",
+    "watch": "esbuild main.ts --bundle --watch --allow-overwrite --servedir=. --outdir=build",
+    "serve-prod": "npx http-server"
   },
   "devDependencies": {
     "esbuild": "0.20.1"

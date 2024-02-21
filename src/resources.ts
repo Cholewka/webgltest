@@ -5,3 +5,10 @@ export async function getFileContents(path: string): Promise<string | null> {
     }
     return null;
 }
+
+export const loadImage = async (path: string): Promise<HTMLImageElement> =>
+    new Promise((resolve) => {
+        const image = new Image();
+        image.addEventListener("load", () => resolve(image));
+        image.src = path; 
+    });

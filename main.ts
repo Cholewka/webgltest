@@ -14,10 +14,11 @@ async function main() {
     gl = tempGL;
 
     const vertices = new Float32Array([
-        // 2 for positions, 3 for color
-        0.0, 0.5, 1.0, 0.0, 0.0,  // top middle
-        0.5, -0.5, 0.0, 1.0, 0.0,  // bottom right
-        -0.5, -0.5, 0.0, 0.0, 1.0,  // bottom left
+        // positions          // colors           // texture coords
+         0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   1.0, 1.0,   // top right
+         0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   1.0, 0.0,   // bottom right
+        -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   0.0, 0.0,   // bottom left
+        -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   0.0, 1.0    // top left 
     ]);
 
     const vbo = gl.createBuffer();
@@ -38,20 +39,12 @@ async function main() {
     gl.useProgram(program);
 
     // Positions
-    const vertexPositionLocation = gl.getAttribLocation(program, "vertexPosition");
-    if (vertexPositionLocation < 0) {
-        throw new Error("Cannot find attribute location for vertexPosition.");
-    }
-    gl.vertexAttribPointer(vertexPositionLocation, 2, gl.FLOAT, false, 20, 0);
-    gl.enableVertexAttribArray(vertexPositionLocation);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
+    gl.enableVertexAttribArray(0);
 
     // Colors
-    const vertexColorLocation = gl.getAttribLocation(program, "vertexColor");
-    if (vertexColorLocation < 0) {
-        throw new Error("Cannot find attribute location for vertexColor.");
-    }
-    gl.vertexAttribPointer(vertexColorLocation, 3, gl.FLOAT, false, 20, 8);
-    gl.enableVertexAttribArray(vertexColorLocation);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 32, 12);
+    gl.enableVertexAttribArray(1);
 
     const ebo = gl.createBuffer();
     if (!ebo) {
@@ -59,8 +52,27 @@ async function main() {
     }
 
     const indices = new Uint32Array([
-        0, 1, 2, // first triangle
+        0, 1, 3, // first triangle
+        1, 2, 3, // second triangle
     ]);
+
+    // Textures
+    const textureImage = new Image();
+    await new Promise<void>((resolve) => {
+        textureImage.src = "../resources/texture.jpg";
+        textureImage.onload = function () {
+            resolve();
+        }
+    });
+
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 512, 512, 0, gl.RGB, gl.UNSIGNED_BYTE, textureImage);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 32, 24);
+    gl.enableVertexAttribArray(2);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
@@ -77,9 +89,9 @@ async function main() {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_INT, 0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0);
 
-        requestAnimationFrame(frame);
+        // requestAnimationFrame(frame);
     }
 
     requestAnimationFrame(frame);
